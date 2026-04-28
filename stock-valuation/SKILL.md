@@ -28,9 +28,42 @@ description: |
 
 ### Phase 1：获取财务数据
 
-使用 NeoData 金融数据搜索 API 获取以下 **11 项数据**（可并行查询）：
+#### ⚠ 前置检查：确认依赖已安装（必须首先执行）
+
+估值流程依赖两个组件，开始查询数据前**必须先检查它们是否存在**：
+
+**检查 1：金融数据查询脚本**
+
+```bash
+QUERY_SCRIPT="$HOME/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/finance-data/skills/neodata-financial-search/scripts/query.py"
+if [ ! -f "$QUERY_SCRIPT" ]; then
+  echo "❌ 金融数据查询插件未安装"
+  echo "请先在 WorkBuddy 客户端中安装以下插件："
+  echo "  插件名: cb_teams_marketplace > finance-data > neodata-financial-search"
+  echo "  安装路径: $QUERY_SCRIPT"
+  exit 1
+fi
+echo "✅ 金融数据查询插件已就绪"
+```
+
+**检查 2：估值计算脚本**
+
+```bash
+VALUATION_SCRIPT="$HOME/.workbuddy/skills/stock-valuation/scripts/valuation.py"
+if [ ! -f "$VALUATION_SCRIPT" ]; then
+  echo "❌ 估值脚本不存在"
+  echo "请确认 stock-valuation skill 已正确安装"
+  echo "  期望路径: $VALUATION_SCRIPT"
+  exit 1
+fi
+echo "✅ 估值脚本已就绪"
+```
+
+> **如果检查失败**：告知用户需要在 WorkBuddy 客户端中安装对应插件，**不要尝试绕过或手动下载**。安装完成后重新执行检查即可。
 
 #### 1.1 完整数据清单
+
+使用 NeoData 金融数据搜索 API 获取以下 **11 项数据**（可并行查询）：
 
 | # | 数据项 | 用途 | 查询关键词示例（替换 `{公司名}` 和 `{代码}`） |
 |---|--------|------|------------------------------------------|
@@ -48,7 +81,7 @@ description: |
 
 > **调用方式**：所有查询使用相同的 API 脚本：
 > ```bash
-> python3 /Users/yan/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/finance-data/skills/neodata-financial-search/scripts/query.py \
+> python3 $HOME/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/finance-data/skills/neodata-financial-search/scripts/query.py \
 >   --query "查询关键词" --data-type api 2>/dev/null
 > ```
 
@@ -189,7 +222,7 @@ description: |
 运行估值脚本：
 
 ```bash
-python3 /Users/yan/.workbuddy/skills/stock-valuation/scripts/valuation.py \
+python3 $HOME/.workbuddy/skills/stock-valuation/scripts/valuation.py \
   --eps <EPS_curr> \
   --roe <ROE_5y_avg> \
   --payout <Payout_5y_avg> \
